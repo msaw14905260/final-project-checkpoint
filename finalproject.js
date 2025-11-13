@@ -247,8 +247,109 @@ async function drawSecondaryEnrollmentGapBar() {
     .text("Gap = Female − Male (% gross)");
 }
 
+async function drawFemaleLifeExpectancyMap() {
+  const width = 800;
+  const height = 500;
+
+  const femaleCol =
+    "average_value_Life expectancy at birth, female (years)";
+
+  const raw = await d3.csv("data/gender.csv");
+
+  const byCountry = d3.rollup(
+    raw,
+    rows => {
+      const valid = rows.filter(
+        d => d[femaleCol] !== "" && d[femaleCol] != null
+      );
+      if (valid.length === 0) return null;
+      const latest = d3.greatest(valid, d => +d.Year);
+      return {
+        country: latest["Country Name"],
+        value: +latest[femaleCol]
+      };
+    },
+    d => d["Country Name"]
+  );
+
+  const data = Array.from(byCountry.values()).filter(d => d !== null);
+
+  if (!data.length) {
+    console.error("No valid female life expectancy data found.");
+    return;
+  }
+
+  const valueMap = new Map(data.map(d => [d.country, d.value]));
+
+  const minVal = d3.min(data, d => d.value);
+  const maxVal = d3.max(data, d => d.value);
+
+  const color = d3.scaleSequential()
+    .domain([minVal, maxVal])
+    .interpolator(d3.interpolateBlues);
+
+  const world = await d3.json(
+    "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
+  );
+  const countries = feature(world, world.objects.countries).features;
+
+  const projection = d3.geoNaturalEarth1()
+    .fitSize([width, height], { type: "FeatureCollection", features: countries });
+  const path = d3.geoPath(projection);
+
+  const svg = d3.select("#female-lifeexp-map")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  const tooltip = d3.select("#map-tooltip");
+
+  svg.selectAll("path")
+    .data(countries)
+    .join("path")
+    .attr("d", path)
+    .attr("fill", d => {
+      const name = d.properties.name;
+      const v = valueMap.get(name);
+      return v != null ? color(v) : "#eee";
+    })
+    .attr("stroke", "#999")
+    .attr("stroke-width", 0.5)
+    .on("mousemove", (event, d) => {
+      const name = d.properties.name;
+      const v = valueMap.get(name);
+
+      tooltip
+        .style("opacity", 1)
+        .style("left", event.pageX + 10 + "px")
+        .style("top", event.pageY + 10 + "px")
+        .html(`
+          <strong>${name}</strong><br/>
+          Female life expectancy: ${
+            v != null ? v.toFixed(1) + " years" : "No data"
+          }
+        `);
+    })
+    .on("mouseleave", () => {
+      tooltip.style("opacity", 0);
+    });
+
+  const legend = d3.select("#map-legend");
+  legend.html(""); 
+
+  legend.append("div")
+    .attr("class", "legend-bar")
+    .style(
+      "background",
+      `linear-gradient(to right, ${d3.interpolateBlues(0)}, ${d3.interpolateBlues(1)})`
+    );
+
+  legend.append("div")
+    .html(`${minVal.toFixed(1)} &nbsp;–&nbsp; ${maxVal.toFixed(1)} years`);
+}
 
 drawSecondaryEnrollmentScatter();
 drawSecondaryEnrollmentGapBar();
+drawFemaleLifeExpectancyMap();
 
 

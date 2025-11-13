@@ -52,3 +52,30 @@ svg {
   font-size: 11px;
   fill: #333;
 }
+
+.tooltip {
+  position: absolute;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+#map-legend {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.legend-bar {
+  width: 300px;
+  height: 12px;
+  background: linear-gradient(to right, #f7fbff, #08306b);
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
