@@ -16,7 +16,7 @@
     <section class="viz-section">
         <h2>Project Overview</h2>
     <p>Dataset: <a href="https://github.com/light-and-salt/World-Bank-Data-by-Indicators/blob/master/gender/gender.csv">World Bank Gender Data</a></p>
-    <p>Group Members: Marianne Sawires, Vanessa Scott, Tatiana Sanchez.</p>
+    <p>Group Members: Marianne Sawires, Vanessa Scott, Tatianna Sanchez.</p>
     <p>In this project, we aim to analyze global gender disparities across education, labor, and health indicators 
       using a multi-year cross-country dataset. Our goal is to uncover regional patterns, long-term trends, and structural 
       inequalities that affect women and girls worldwide. We will explore relationships between metrics such as literacy 
@@ -52,11 +52,27 @@
   <!-- === VISUAL 2: INCOME STACKED BAR CHART === -->
   <h2>Enrollment Rate by Income Group, Gender, and Education Level</h2>
 
+
   <!-- Dropdown to select education level -->
 
 
   <!-- Chart container -->
   <div id="chart-income"></div>
+
+      <section class="viz-section">
+    <h2>Missing Data by Feature</h2>
+    <p class="explainer">The percentage of rows with missing values for each feature. This shows us that we need to normalize the data.</p>
+    <div class="chart-container" id="missing-bar"></div>
+    </section>
+
+          <section class="viz-section">
+    <h2>Correlation Heatmap (Women-Focused)</h2>
+    <p>Female features were chosen b/c there were fewer missing values compared to male features.</p>
+    <p>The red represents a strong negative correlation between the two features while the dark blue respresents a strong positive correlation.</p>;
+
+
+    <div class="chart-container" id="correlation-heatmap"></div>
+        </section>
 
   <script type="module" src="finalproject.js"></script>
 </body>

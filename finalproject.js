@@ -526,3 +526,204 @@ Male: ${d.data.Male.toFixed(1)}%`);
     updateStacked(this.value);
   });
 });
+
+const col_edu_fe = "average_value_School enrollment, secondary, female (% gross)";
+const col_life_fe = "average_value_Life expectancy at birth, female (years)";
+const col_lab_fe = "average_value_Labor force participation rate, female    (% of female population ages 15+) (modeled ILO estimate)";
+const col_fert = "average_value_Adolescent fertility rate (births per 1,000 women ages 15-19)";
+const col_edu_ma = "average_value_School enrollment, secondary, male (% gross)";    
+const col_life_ma = "average_value_Life expectancy at birth, male (years)";
+const col_lab_ma = "average_value_Labor force participation rate, male (% of male population ages 15+) (modeled ILO estimate)";
+
+const allFeatures = [
+    {key: col_edu_fe, label: "Female Secondary School Enrollment (%)"},
+    {key: col_life_fe, label: "Female Life Expectancy (yrs)"},
+    {key: col_lab_fe, label: "Female Labor Force Participation (%)"},
+    {key: col_fert, label: "Adolescent Fertility Rate (births per 1,000 girls 15-19)"},
+    {key: col_edu_ma, label: "Male Secondary School Enrollment (%)"},
+    {key: col_life_ma, label: "Male Life Expectancy (yrs)"},
+    {key: col_lab_ma, label: "Male Labor Force Participation (%)"}  
+];
+
+const femaleFeatures = [
+    {key: col_edu_fe, label: "Female Secondary School Enrollment (%)"},
+    {key: col_life_fe, label: "Female Life Expectancy (yrs)"},
+    {key: col_lab_fe, label: "Female Labor Force Participation (%)"},
+    {key: col_fert, label: "Adolescent Fertility Rate (births per 1,000 girls 15-19)"}
+
+];
+
+function isValidNumber(v) {
+    return v !== null && v !== undefined && v !== "" && !Number.isNaN(+v);
+}
+
+function shortenLabel(key) {
+    const f = [... femaleFeatures, ...allFeatures].find(d => d.key === key);
+    return f ? f.label : key;
+}
+
+function pearson(xs, ys) {
+    const n = xs.length;
+    if (n === 0) return 0;
+    const meanX = d3.mean(xs);
+    const meanY = d3.mean(ys);
+    let num = 0, denX = 0, denY = 0;
+    for (let i = 0; i < n; i++) {
+        const dx = xs[i] - meanX;
+        const dy = ys[i] - meanY;
+        num += dx * dy;
+        denX += dx * dx;
+        denY += dy * dy;
+    }
+    const den = Math.sqrt(denX * denY);
+    return den === 0 ? 0 : num / den;
+}
+
+d3.csv("data/gender.csv", d3.autoType).then(raw => {
+    console.log("Columns in CSV:", raw.columns);
+
+    const data = raw.filter(row => 
+        allFeatures.some(f => isValidNumber(row[f.key]))
+    );
+
+    MissingBarChart(data);
+    CorrelationHeatmap(data);
+    ScatterMatrix(data);
+});
+
+
+
+function MissingBarChart(data) {
+   const width = 900;
+   const height = 450;
+   const margin = {top: 40, right: 10, bottom: 120, left: 60};
+
+   const svg = d3.select("#missing-bar")
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+    const stats = allFeatures.map(f => {
+        const total = data.length;
+        const missing = data.filter(d => !isValidNumber(d[f.key])).length;
+        const missingPct = (missing / total) * 100;
+        return {
+            key: f.key,
+            label: f.label,
+            missingPct
+        };
+    });
+
+    const x = d3.scaleBand()
+        .domain(stats.map(d => d.key))
+        .range([margin.left, width - margin.right])
+        .padding(0.3);
+    
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(stats, d => d.missingPct) || 1])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
+    
+    // Bars
+    svg.append("g")
+        .selectAll("rect")
+        .data(stats)
+        .join("rect")
+            .attr("x", d => x(d.key))
+            .attr("y", d => y(d.missingPct))
+            .attr("width", x.bandwidth())
+            .attr("height", d => y(0) - y(d.missingPct))
+            .attr("fill", "steelblue");
+    
+    // X-axis
+    svg.append("g")
+        .attr("transform", `translate(0, ${height - margin.bottom})`)
+        .call(d3.axisBottom(x).tickFormat(shortenLabel))
+        .selectAll("text")
+            .attr("transform", "rotate(-30)")
+            .style("text-anchor", "end")
+            .style("font-size", "11px");
+    
+    // Y-axis
+    svg.append("g")
+        .attr("transform", `translate(${margin.left}, 0)`)
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + "%"));
+    
+    // Y-axis label
+    svg.append("text")
+        .attr("x", margin.left)
+        .attr("y", margin.top - 10)
+        .attr("fill", "black")
+        .style("font-size", "11px")
+        .text("% of rows with missing values (by feature)");
+}
+
+function CorrelationHeatmap(data) {
+    const keys = femaleFeatures.map(f => f.key);
+
+    const width = 900;
+    const height = 450;
+    const margin = {top: 120, right: 40, bottom: 40, left: 180};
+
+    const svg = d3.select("#correlation-heatmap")
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`);
+
+    const cells = [];
+
+    keys.forEach(rowKey => {
+        keys.forEach(colKey => {
+            const validRows = data.filter(d => isValidNumber(d[rowKey]) && isValidNumber(d[colKey]));
+            const xs = validRows.map(d => +d[colKey]);
+            const ys = validRows.map(d => +d[rowKey]);
+            const r = pearson(xs, ys);
+            cells.push({
+                rowKey,
+                colKey,
+                value: r
+            });
+        });
+    });
+
+    const x = d3.scaleBand()
+        .domain(keys)
+        .range([margin.left, width - margin.right])
+        .padding(0.03);
+
+    const y = d3.scaleBand()
+        .domain(keys)
+        .range([margin.top, height - margin.bottom])
+        .padding(0.03);
+
+    const color = d3.scaleSequential()
+        .domain([-1, 1])
+        .interpolator(d3.interpolateRdBu);
+
+    svg.append("g")
+        .selectAll("rect")
+        .data(cells)
+        .join("rect")
+            .attr("x", d => x(d.colKey))
+            .attr("y", d => y(d.rowKey))
+            .attr("width", x.bandwidth())
+            .attr("height", y.bandwidth())
+            .style("fill", d => color(d.value))
+            .append("title")
+                .text(d => `Correlation between ${d.rowKey} and ${d.colKey}: ${d.value.toFixed(2)}`);
+    // X-axis
+    svg.append("g")
+        .attr("transform", `translate(0, ${margin.top})`)
+        .call(d3.axisTop(x).tickFormat(shortenLabel))
+        .selectAll("text")
+            .attr("transform", "rotate(-40)")
+            .style("text-anchor", "start");
+    
+    // Y-axis
+    svg.append("g")
+        .attr("transform", `translate(${margin.left - 10}, 0)`)
+        .call(d3.axisLeft(y).tickFormat(shortenLabel));
+
+
+} 
+ScatterMatrix(data);
+MissingBarChart(data);
+CorrelationHeatmap(data);
