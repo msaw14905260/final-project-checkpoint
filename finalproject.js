@@ -1,122 +1,6 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { feature } from "https://cdn.jsdelivr.net/npm/topojson-client@3/+esm";
 
-async function drawSecondaryEnrollmentScatter() {
-  const width = 800;
-  const height = 500;
-  const margin = { top: 50, right: 40, bottom: 60, left: 70 };
-
-  const femaleCol =
-    "average_value_School enrollment, secondary, female (% gross)";
-  const maleCol =
-    "average_value_School enrollment, secondary, male (% gross)";
-
-  const raw = await d3.csv("data/gender.csv");
-
-  const byCountry = d3.rollup(
-    raw,
-    rows => {
-      const valid = rows.filter(
-        d =>
-          d[femaleCol] !== "" &&
-          d[femaleCol] != null &&
-          d[maleCol] !== "" &&
-          d[maleCol] != null
-      );
-      if (valid.length === 0) return null;
-
-      const latest = d3.greatest(valid, d => +d.Year);
-      return {
-        country: latest["Country Name"],
-        year: +latest.Year,
-        female: +latest[femaleCol],
-        male: +latest[maleCol]
-      };
-    },
-    d => d["Country Name"]
-  );
-
-  const data = Array.from(byCountry.values()).filter(d => d !== null);
-
-  if (!data.length) {
-    console.error("No valid data found for secondary enrollment.");
-    return;
-  }
-
-  const xExtent = d3.extent(data, d => d.female);
-  const yExtent = d3.extent(data, d => d.male);
-
-  const x = d3.scaleLinear()
-    .domain(xExtent).nice()
-    .range([margin.left, width - margin.right]);
-
-  const y = d3.scaleLinear()
-    .domain(yExtent).nice()
-    .range([height - margin.bottom, margin.top]);
-
-  const svg = d3.select("#secondary-enrollment-scatter")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-  const xAxis = d3.axisBottom(x);
-  const yAxis = d3.axisLeft(y);
-
-  svg.append("g")
-    .attr("transform", `translate(0, ${height - margin.bottom})`)
-    .call(xAxis);
-
-  svg.append("g")
-    .attr("transform", `translate(${margin.left}, 0)`)
-    .call(yAxis);
-
-  const minVal = Math.min(x.domain()[0], y.domain()[0]);
-  const maxVal = Math.max(x.domain()[1], y.domain()[1]);
-
-  svg.append("line")
-    .attr("x1", x(minVal))
-    .attr("y1", y(minVal))
-    .attr("x2", x(maxVal))
-    .attr("y2", y(maxVal))
-    .attr("stroke", "#999")
-    .attr("stroke-width", 1)
-    .attr("stroke-dasharray", "4,4");
-
-  // 7. Points (one per country)
-  svg.selectAll("circle")
-    .data(data)
-    .join("circle")
-    .attr("cx", d => x(d.female))
-    .attr("cy", d => y(d.male))
-    .attr("r", 4)
-    .attr("fill", "#4f8bc9")
-    .attr("opacity", 0.8);
-
-  // 8. Title
-  svg.append("text")
-    .attr("class", "chart-title")
-    .attr("x", width / 2)
-    .attr("y", margin.top - 20)
-    .attr("text-anchor", "middle")
-    .text("Female vs Male Secondary School Enrollment (% gross) – Latest Year per Country");
-
-  // 9. Axis labels
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("x", width / 2)
-    .attr("y", height - 20)
-    .attr("text-anchor", "middle")
-    .text("Female secondary enrollment (% gross)");
-
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -height / 2)
-    .attr("y", 25)
-    .attr("text-anchor", "middle")
-    .text("Male secondary enrollment (% gross)");
-}
-
 async function drawSecondaryEnrollmentGapBar() {
   const width = 800;
   const height = 500;
@@ -348,7 +232,6 @@ async function drawFemaleLifeExpectancyMap() {
     .html(`${minVal.toFixed(1)} &nbsp;–&nbsp; ${maxVal.toFixed(1)} years`);
 }
 
-drawSecondaryEnrollmentScatter();
 drawSecondaryEnrollmentGapBar();
 drawFemaleLifeExpectancyMap();
 
