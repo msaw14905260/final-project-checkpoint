@@ -79,3 +79,146 @@ svg {
   border: 1px solid #ccc;
   margin-right: 10px;
 }
+
+/* ===============================
+   GLOBAL STYLES
+   =============================== */
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fafafa;
+  color: #333;
+  margin: 0;
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* Headings */
+h2 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-top: 60px;
+  margin-bottom: 10px;
+  color: #1e2b4a;
+}
+
+/* Axis & Chart Text */
+text {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ===============================
+   REGION CHART (Grouped Bar)
+   =============================== */
+
+#chart-region {
+  margin: 40px auto;
+  width: 1200px;
+  max-width: 95vw;
+}
+
+/* Region Dropdown */
+#regionSelect {
+  margin: 10px 0 25px 10px;
+  padding: 8px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  transition: box-shadow 0.2s ease;
+}
+#regionSelect:hover {
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* Bar hover effect */
+rect:hover {
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+/* ===============================
+   INCOME STACKED BAR CHART
+   =============================== */
+
+#chart-income {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px auto 80px;
+  width: 800px;
+  max-width: 95vw;
+}
+
+/* Education Level Dropdown */
+#eduDropdown {
+  margin-left: 10px;
+  padding: 8px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  transition: box-shadow 0.2s ease;
+}
+#eduDropdown:hover {
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* Chart Titles */
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  fill: #1e2b4a;
+}
+
+/* Axis labels */
+.y-label {
+  font-size: 16px;
+  font-weight: 500;
+  fill: #333;
+}
+
+/* Legend styling */
+.legend text {
+  font-size: 15px;
+  fill: #333;
+}
+.legend rect {
+  stroke: #ccc;
+  stroke-width: 0.5;
+}
+
+/* ===============================
+   TOOLTIPS
+   =============================== */
+
+.tooltip {
+  position: absolute;
+  text-align: center;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  pointer-events: none;
+  color: #222;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ===============================
+   RESPONSIVE TWEAKS
+   =============================== */
+
+@media (max-width: 900px) {
+  h2 {
+    font-size: 22px;
+  }
+
+  #chart-region, #chart-income {
+    width: 95%;
+  }
+
+  #regionSelect, #eduDropdown {
+    font-size: 14px;
+  }
+}
