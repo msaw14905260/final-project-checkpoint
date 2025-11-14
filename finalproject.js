@@ -134,6 +134,7 @@ async function drawSecondaryEnrollmentGapBar() {
 async function drawFemaleLifeExpectancyMap() {
   const width = 800;
   const height = 500;
+  const margin = { top: 50, right: 40, bottom: 120, left: 80 };
 
   const femaleCol =
     "average_value_Life expectancy at birth, female (years)";
@@ -235,20 +236,24 @@ async function drawFemaleLifeExpectancyMap() {
 drawSecondaryEnrollmentGapBar();
 drawFemaleLifeExpectancyMap();
 
+const outerWidth = 800;
+const outerHeight = 500;
+
 // ======================================================
 // --- VISUAL 1: Grouped Bar Chart (Region x Gender x Education)
 // ======================================================
 
-const margin1 = { top: 80, right: 80, bottom: 100, left: 100 };
-const width1 = 1200 - margin1.left - margin1.right;
-const height1 = 700 - margin1.top - margin1.bottom;
+const margin1 = { top: 70, right: 70, bottom: 80, left: 100 };
+const width1 = outerWidth - margin1.left - margin1.right;
+const height1 = outerHeight - margin1.top - margin1.bottom;
 
 const svg1 = d3.select("#chart-region")
   .append("svg")
-  .attr("width", width1 + margin1.left + margin1.right)
-  .attr("height", height1 + margin1.top + margin1.bottom)
+  .attr("width", outerWidth)
+  .attr("height", outerHeight)
   .append("g")
   .attr("transform", `translate(${margin1.left},${margin1.top})`);
+
 
 const x0 = d3.scaleBand().padding(0.15).range([0, width1]);
 const x1 = d3.scaleBand().padding(0.05);
@@ -375,14 +380,14 @@ d3.csv("data/education_long_with_regions.csv").then((data) => {
 // --- VISUAL 2: Stacked Bar Chart (Income x Gender x Education)
 // ======================================================
 
-const margin2 = { top: 70, right: 100, bottom: 70, left: 90 };
-const width2 = 700 - margin2.left - margin2.right;
-const height2 = 500 - margin2.top - margin2.bottom;
+const margin2 = { top: 90, right: 40, bottom: 100, left: 100 };
+const width2 = outerWidth - margin2.left - margin2.right;
+const height2 = outerHeight - margin2.top - margin2.bottom;
 
 const svg2 = d3.select("#chart-income")
   .append("svg")
-  .attr("width", width2 + margin2.left + margin2.right)
-  .attr("height", height2 + margin2.top + margin2.bottom)
+  .attr("width", outerWidth)
+  .attr("height", outerHeight)
   .append("g")
   .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
@@ -394,15 +399,7 @@ const incomeOrder = ["Low income", "Lower middle income", "Upper middle income",
 const educationLevels = ["Primary", "Secondary", "Tertiary"];
 
 // --- Dropdown for Education Level ---
-const eduSelect = d3.select("body")
-  .insert("div", "#chart-income")
-  .style("margin-top", "20px")
-  .style("text-align", "center")
-  .html(`
-    <label for="eduDropdown">Select Education Level:</label>
-    <select id="eduDropdown"></select>
-  `);
-
+// --- Dropdown for Education Level (already in HTML) ---
 d3.select("#eduDropdown")
   .selectAll("option")
   .data(educationLevels)
@@ -410,6 +407,7 @@ d3.select("#eduDropdown")
   .append("option")
   .attr("value", d => d)
   .text(d => d);
+
 
 let currentLevel = "Primary";
 
@@ -488,7 +486,7 @@ Male: ${d.data.Male.toFixed(1)}%`);
     // Labels
     svg2.append("text")
       .attr("x", width2 / 2)
-      .attr("y", -30)
+      .attr("y", -45)
       .attr("text-anchor", "middle")
       .attr("font-size", "22px")
       .attr("font-weight", "bold")
@@ -503,22 +501,24 @@ Male: ${d.data.Male.toFixed(1)}%`);
       .text("Enrollment Rate (%)");
 
     // Legend
-    const legend = svg2.append("g")
-      .attr("transform", `translate(${width2 - 180}, 0)`);
+const legend = svg2.append("g")
+  .attr("class", "legend")
+  .attr("transform", `translate(${width2 - 120}, -30)`); 
 
-    ["Female", "Male"].forEach((g, i) => {
-      legend.append("rect")
-        .attr("x", 0)
-        .attr("y", i * 25)
-        .attr("width", 18)
-        .attr("height", 18)
-        .attr("fill", color2(g));
-      legend.append("text")
-        .attr("x", 25)
-        .attr("y", i * 25 + 13)
-        .attr("font-size", "14px")
-        .text(g);
-    });
+["Female", "Male"].forEach((g, i) => {
+  legend.append("rect")
+    .attr("x", 0)
+    .attr("y", i * 22)
+    .attr("width", 16)
+    .attr("height", 16)
+    .attr("fill", color2(g));
+
+  legend.append("text")
+    .attr("x", 24)
+    .attr("y", i * 22 + 12)
+    .attr("font-size", "13px")
+    .text(g);
+});
   }
 
   updateStacked(currentLevel);
@@ -594,9 +594,9 @@ d3.csv("data/gender.csv", d3.autoType).then(raw => {
 
 
 function MissingBarChart(data) {
-   const width = 900;
-   const height = 450;
-   const margin = {top: 40, right: 10, bottom: 120, left: 60};
+   const width = 800;
+   const height = 500;
+   const margin = {top: 50, right: 30, bottom: 150, left: 120};
 
    const svg = d3.select("#missing-bar")
         .append("svg")
@@ -660,9 +660,9 @@ function MissingBarChart(data) {
 function CorrelationHeatmap(data) {
     const keys = femaleFeatures.map(f => f.key);
 
-    const width = 900;
+    const width = 800;
     const height = 450;
-    const margin = {top: 120, right: 40, bottom: 40, left: 180};
+    const margin = {top: 140, right: 125, bottom: 30, left: 270};
 
     const svg = d3.select("#correlation-heatmap")
         .append("svg")

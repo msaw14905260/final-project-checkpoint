@@ -42,23 +42,26 @@
 
 
   </main>
-
+<section class="viz-section">
   <!-- === VISUAL 1: REGION GROUPED BAR CHART === -->
   <h2>Education Enrollment by Gender and Region</h2>
   <label for="regionSelect">Select Region:</label>
   <select id="regionSelect"></select>
   <div id="chart-region"></div>
+  </section>
 
+  <section class="viz-section">
   <!-- === VISUAL 2: INCOME STACKED BAR CHART === -->
   <h2>Enrollment Rate by Income Group, Gender, and Education Level</h2>
 
+  <div class="controls">
+    <label for="eduDropdown">Select Education Level:</label>
+    <select id="eduDropdown"></select>
+  </div>
 
-  <!-- Dropdown to select education level -->
-
-
-  <!-- Chart container -->
   <div id="chart-income"></div>
-
+</section>
+    
       <section class="viz-section">
     <h2>Missing Data by Feature</h2>
     <p class="explainer">The percentage of rows with missing values for each feature. This shows us that we need to normalize the data.</p>
